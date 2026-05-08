@@ -606,7 +606,11 @@ async function submitQuiz() {
     const aiResp = await fetch('/api/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'get_profile', reponses: answers, questions: activeQuestions || null })
+      body: JSON.stringify({
+        action: 'get_profile',
+        reponses: answers,
+        questions: activeQuestions ? activeQuestions.map(q => ({ texte: q.q, choix: q.choices })) : null
+      })
     });
 
     if (!aiResp.ok) {
