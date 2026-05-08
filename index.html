@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quel est ton profil mental à cheval ?</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #faf9f6;
+      --surface: #ffffff;
+      --border: #e8e4dc;
+      --text: #1c1c1a;
+      --text-muted: #6b6860;
+      --accent: #5c3d2e;
+      --accent-light: #f5ede8;
+      --accent-btn: #8b5e4a;
+      --gold: #c9a84c;
+      --radius: 12px;
+      --shadow: 0 2px 20px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    .container { max-width: 640px; margin: 0 auto; }
+
+    /* ---- HERO ---- */
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 2.5rem;
+    }
+    .hero-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .hero h1 {
+      font-size: 1.9rem;
+      font-weight: normal;
+      line-height: 1.25;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto 2rem;
+    }
+    .btn-start {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      padding: 0.9rem 2.5rem;
+      font-size: 1rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-start:hover { background: var(--accent-btn); transform: translateY(-1px); }
+
+    /* ---- QUIZ ---- */
+    .quiz-section { display: none; }
+    .quiz-section.active { display: block; }
+
+    .progress-bar-wrap {
+      background: var(--border);
+      border-radius: 100px;
+      height: 5px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 100px;
+      transition: width 0.4s ease;
+    }
+
+    .question-counter {
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .question-text {
+      font-size: 1.25rem;
+      font-weight: normal;
+      color: var(--accent);
+      margin-bottom: 1.75rem;
+      line-height: 1.4;
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .choice-btn {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .choice-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+    .choice-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      font-weight: 600;
+    }
+    .choice-letter {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-family: monospace;
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+    .choice-btn.selected .choice-letter {
+      background: var(--accent);
+      color: white;
+    }
+
+    .nav-btns {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+    .btn-nav {
+      padding: 0.7rem 1.5rem;
+      border-radius: 100px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-nav.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .btn-nav.primary:hover { background: var(--accent-btn); }
+    .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ---- LOADING ---- */
+    .loading-section { display: none; text-align: center; padding: 4rem 1rem; }
+    .loading-section.active { display: block; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-section p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* ---- RESULT ---- */
+    .result-section { display: none; }
+    .result-section.active { display: block; }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .result-emoji { font-size: 3rem; margin-bottom: 0.75rem; }
+    .result-profil-name {
+      font-size: 0.7rem;
+      font-family: monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .result-title {
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .result-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+    .result-pct {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .result-description {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--text);
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+    .result-conseil {
+      background: var(--accent-light);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1.25rem;
+      text-align: left;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+    .result-conseil strong { display: block; margin-bottom: 0.25rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .btn-restart {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 1rem;
+      border-radius: 100px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-restart:hover { border-color: var(--accent); color: var(--accent); }
+
+    .error-msg {
+      background: #fdf2f2;
+      border: 1px solid #e8b4b4;
+      border-radius: var(--radius);
+      padding: 1rem;
+      color: #c0392b;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HERO -->
+  <section id="hero" class="hero">
+    <div class="hero-icon">🐴</div>
+    <h1>Quel est ton profil mental à cheval ?</h1>
+    <p>12 questions pour découvrir comment ton mental fonctionne — et comment le transformer en atout.</p>
+    <button class="btn-start" onclick="startQuiz()">Commencer le quiz →</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="quiz-section">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+    </div>
+    <p class="question-counter" id="questionCounter">Question 1 / 12</p>
+    <p class="question-text" id="questionText"></p>
+    <div class="choices" id="choices"></div>
+    <div class="nav-btns">
+      <button class="btn-nav" id="btnPrev" onclick="prevQ()" disabled>← Retour</button>
+      <button class="btn-nav primary" id="btnNext" onclick="nextQ()">Suivant →</button>
+    </div>
+  </section>
+
+  <!-- LOADING -->
+  <section id="loading" class="loading-section">
+    <div class="spinner"></div>
+    <p>Analyse de ton profil en cours…</p>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="result-section">
+    <div class="result-card">
+      <div class="result-emoji" id="resEmoji"></div>
+      <p class="result-profil-name">Ton profil mental</p>
+      <h2 class="result-title" id="resTitle"></h2>
+      <p class="result-subtitle" id="resSubtitle"></p>
+      <div class="result-pct" id="resPct"></div>
+      <p class="result-description" id="resDescription"></p>
+      <div class="result-conseil">
+        <strong>Piste concrète</strong>
+        <span id="resConseil"></span>
+      </div>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <button class="btn-restart" onclick="restart()">↺ Refaire le quiz</button>
+  </section>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "Ton mental est plutôt…",
+    choices: [
+      "Je réfléchis trop à tout",
+      "Je me critique beaucoup",
+      "Je suis concentré(e) sur ce que j'ai à faire",
+      "J'ai parfois l'impression que mon cerveau « bug »"
+    ]
+  },
+  {
+    q: "En compétition ou sous pression, je…",
+    choices: [
+      "Perds mes moyens",
+      "Monte différemment de d'habitude",
+      "Deviens très tendu(e) physiquement",
+      "Reste globalement pareil(le)"
+    ]
+  },
+  {
+    q: "Quand mon cheval se tend ou réagit, je…",
+    choices: [
+      "Sens immédiatement mon stress monter",
+      "Me crispe ou m'accroche",
+      "Essaie de gérer mes émotions pour l'aider",
+      "Arrive à garder mon calme"
+    ]
+  },
+  {
+    q: "Après un échec ou une mauvaise séance…",
+    choices: [
+      "Je suis très affecté(e) émotionnellement",
+      "Je remets mes capacités en question",
+      "J'analyse pour comprendre et progresser",
+      "Je passe rapidement à autre chose"
+    ]
+  },
+  {
+    q: "À cheval, je ressens surtout…",
+    choices: [
+      "Du stress",
+      "De la peur",
+      "Beaucoup d'anticipation négative",
+      "De la sérénité"
+    ]
+  },
+  {
+    q: "Mon niveau de confiance à cheval est…",
+    choices: [
+      "Très bas",
+      "Instable",
+      "Correct mais fragile",
+      "Solide la plupart du temps"
+    ]
+  },
+  {
+    q: "Quand quelque chose se passe mal à cheval, mon premier réflexe est…",
+    choices: [
+      "Imaginer que ça peut empirer",
+      "M'en vouloir immédiatement",
+      "Chercher une solution rapidement",
+      "Garder mon calme et m'adapter"
+    ]
+  },
+  {
+    q: "Avant de monter, je…",
+    choices: [
+      "Anticipe souvent le pire",
+      "Ressens une boule au ventre",
+      "Me mets beaucoup de pression",
+      "Me sens plutôt détendu(e)"
+    ]
+  },
+  {
+    q: "Après une chute, une grosse peur ou une mauvaise expérience…",
+    choices: [
+      "Mon cerveau continue d'y penser longtemps",
+      "Certaines images reviennent souvent",
+      "J'ai perdu une partie de ma confiance",
+      "J'arrive à tourner la page assez vite"
+    ]
+  },
+  {
+    q: "Quand je regarde les autres cavaliers…",
+    choices: [
+      "Je me compare énormément",
+      "J'ai peur du jugement",
+      "Ça peut me mettre de la pression",
+      "Ça ne change pas grand chose pour moi"
+    ]
+  },
+  {
+    q: "À cheval, j'ai le plus de mal à…",
+    choices: [
+      "Faire confiance",
+      "Lâcher le contrôle",
+      "Croire en moi",
+      "Gérer mes émotions"
+    ]
+  },
+  {
+    q: "Si je pouvais changer UNE chose dans mon mental à cheval…",
+    choices: [
+      "Arrêter d'avoir peur",
+      "Arrêter de trop penser",
+      "Avoir plus confiance en moi",
+      "Être plus calme intérieurement"
+    ]
+  }
+];
+
+let current = 0;
+let answers = new Array(12).fill(null);
+
+function startQuiz() {
+  document.getElementById('hero').style.display = 'none';
+  document.getElementById('quiz').classList.add('active');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  document.getElementById('questionCounter').textContent = `Question ${current + 1} / ${QUESTIONS.length}`;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('progressBar').style.width = `${(current / QUESTIONS.length) * 100}%`;
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn' + (answers[current] === i + 1 ? ' selected' : '');
+    btn.innerHTML = `<span class="choice-letter">${letters[i]}</span><span>${c}</span>`;
+    btn.onclick = () => selectChoice(i + 1);
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById('btnPrev').disabled = current === 0;
+  const isLast = current === QUESTIONS.length - 1;
+  document.getElementById('btnNext').textContent = isLast ? 'Voir mon profil →' : 'Suivant →';
+}
+
+function selectChoice(val) {
+  answers[current] = val;
+  renderQuestion();
+}
+
+function nextQ() {
+  if (answers[current] === null) {
+    document.querySelectorAll('.choice-btn').forEach(b => b.style.borderColor = '#e8a0a0');
+    setTimeout(() => document.querySelectorAll('.choice-btn').forEach(b => b.style.borderColor = ''), 800);
+    return;
+  }
+  if (current < QUESTIONS.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    submitQuiz();
+  }
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQuestion(); }
+}
+
+async function submitQuiz() {
+  document.getElementById('quiz').classList.remove('active');
+  document.getElementById('loading').classList.add('active');
+
+  try {
+    // 1. Get AI profile
+    const aiResp = await fetch('/api/quiz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_profile', reponses: answers })
+    });
+
+    if (!aiResp.ok) throw new Error(`Erreur serveur (${aiResp.status})`);
+    const profile = await aiResp.json();
+    if (profile.error) throw new Error(profile.error);
+
+    // 2. Save to Supabase
+    await fetch('/api/quiz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'save_result',
+        data: {
+          reponses: answers,
+          profil: profile.profil,
+          profil_secondaire: profile.profil_secondaire || null,
+          description_ia: profile.description,
+          created_at: new Date().toISOString()
+        }
+      })
+    });
+
+    showResult(profile);
+  } catch (err) {
+    document.getElementById('loading').classList.remove('active');
+    document.getElementById('result').classList.add('active');
+    const errEl = document.getElementById('errorMsg');
+    errEl.textContent = 'Une erreur est survenue : ' + err.message;
+    errEl.classList.add('visible');
+  }
+}
+
+function showResult(p) {
+  document.getElementById('loading').classList.remove('active');
+  document.getElementById('result').classList.add('active');
+
+  document.getElementById('resEmoji').textContent = p.emoji || '🐴';
+  document.getElementById('resTitle').textContent = p.profil;
+  document.getElementById('resSubtitle').textContent = p.sous_titre;
+  document.getElementById('resPct').textContent = `Ce profil représente environ ${p.pourcentage} des cavaliers`;
+  document.getElementById('resDescription').textContent = p.description;
+  document.getElementById('resConseil').textContent = p.conseil_cle;
+}
+
+function restart() {
+  current = 0;
+  answers = new Array(12).fill(null);
+  document.getElementById('result').classList.remove('active');
+  document.getElementById('errorMsg').classList.remove('visible');
+  document.getElementById('hero').style.display = '';
+}
+</script>
+</body>
+</html>

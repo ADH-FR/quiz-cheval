@@ -1,0 +1,5 @@
+.env
+.env.local
+node_modules/
+.netlify/state.json
+*.json.bak
