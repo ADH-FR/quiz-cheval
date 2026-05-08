@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Quiz Mental Cheval</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e2e0d8;
+      --text: #1a1a18;
+      --text-muted: #6b6a64;
+      --text-hint: #9e9d97;
+      --accent: #5c3d2e;
+      --accent-light: #f5ede8;
+      --accent-btn: #8b5e4a;
+      --green: #2d6a4f;
+      --green-light: #e8f5ee;
+      --danger: #c0392b;
+      --danger-light: #fdf2f2;
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+    body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 1.5rem 1rem 4rem; }
+    .container { max-width: 780px; margin: 0 auto; }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+    }
+    header h1 { font-size: 1.1rem; font-weight: normal; color: var(--text); }
+    header p { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+    .card-title { font-size: 0.65rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-hint); margin-bottom: 1rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1.1rem; border-radius: 100px;
+      font-family: inherit; font-size: 0.85rem; cursor: pointer;
+      border: 1.5px solid var(--border); background: var(--surface); color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .btn.primary:hover { background: var(--accent-btn); }
+    .btn.green { background: var(--green); color: white; border-color: var(--green); }
+    .btn.green:hover { background: #1b4332; }
+    .btn.danger { color: var(--danger); border-color: #e8b4b4; }
+    .btn.danger:hover { background: var(--danger-light); }
+    .btn.small { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    input[type="text"], input[type="email"], textarea, select {
+      width: 100%; padding: 0.65rem 0.9rem;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      font-family: inherit; font-size: 0.9rem; color: var(--text);
+      background: var(--bg); outline: none; transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 70px; }
+    .field { margin-bottom: 0.85rem; }
+    .field label { display: block; font-size: 0.75rem; font-family: monospace; color: var(--text-muted); margin-bottom: 0.35rem; }
+
+    /* MODÈLES LIST */
+    .modele-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.9rem 0; border-bottom: 1px solid var(--border);
+    }
+    .modele-row:last-child { border-bottom: none; }
+    .modele-info { flex: 1; }
+    .modele-titre { font-size: 0.95rem; color: var(--text); }
+    .modele-sujet { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
+    .badge-actif {
+      font-size: 0.65rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.1em;
+      background: var(--green-light); color: var(--green);
+      padding: 0.2rem 0.6rem; border-radius: 100px;
+    }
+    .modele-actions { display: flex; gap: 0.4rem; }
+
+    /* QUESTIONS EDITOR */
+    .question-item {
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 0.6rem; overflow: hidden;
+    }
+    .question-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; background: var(--bg); cursor: pointer;
+    }
+    .question-num { font-size: 0.7rem; font-family: monospace; color: var(--text-hint); min-width: 24px; }
+    .question-preview { flex: 1; font-size: 0.9rem; color: var(--text); }
+    .question-controls { display: flex; gap: 0.3rem; }
+    .btn-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; color: var(--text-muted); transition: all 0.1s;
+    }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+    .question-body { padding: 1rem; border-top: 1px solid var(--border); display: none; }
+    .question-body.open { display: block; }
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
+    .choice-label { font-size: 0.7rem; font-family: monospace; color: var(--text-hint); margin-bottom: 0.2rem; }
+
+    /* GENERATE PANEL */
+    .generate-panel {
+      background: var(--accent-light); border: 1px solid #e0c8bc;
+      border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem;
+    }
+    .generate-panel .card-title { color: var(--accent-btn); }
+
+    /* STATUS */
+    .status-msg {
+      padding: 0.75rem 1rem; border-radius: var(--radius);
+      font-size: 0.85rem; margin-bottom: 1rem; display: none;
+    }
+    .status-msg.success { background: var(--green-light); color: var(--green); display: block; }
+    .status-msg.error { background: var(--danger-light); color: var(--danger); display: block; }
+
+    .spinner-inline {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.4); border-top-color: white;
+      border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem; }
+
+    .back-btn { margin-bottom: 1.5rem; }
+    .row { display: flex; gap: 0.75rem; align-items: flex-start; }
+    .row .field { flex: 1; }
+    .actions-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <h1>Admin — Quiz Mental Cheval</h1>
+      <p>Gestion des modèles de quiz</p>
+    </div>
+    <a href="/" class="btn small">← Voir le quiz</a>
+  </header>
+
+  <div id="statusMsg" class="status-msg"></div>
+
+  <!-- ====== VUE LISTE ====== -->
+  <div id="viewList">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <p class="card-title" style="margin:0;">Modèles de quiz</p>
+      <button class="btn primary" onclick="newModele()">+ Nouveau modèle</button>
+    </div>
+    <div class="card">
+      <div id="modelesList"><div class="empty-state">Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- ====== VUE ÉDITEUR ====== -->
+  <div id="viewEdit" style="display:none;">
+    <button class="btn back-btn" onclick="backToList()">← Retour à la liste</button>
+
+    <!-- Info modèle -->
+    <div class="card">
+      <p class="card-title">Informations du modèle</p>
+      <div class="row">
+        <div class="field">
+          <label>Titre du quiz</label>
+          <input type="text" id="editTitre" placeholder="Ex: Profil mental cavalier" />
+        </div>
+        <div class="field">
+          <label>Sujet / thème</label>
+          <input type="text" id="editSujet" placeholder="Ex: mental équitation" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Description (optionnel)</label>
+        <textarea id="editDescription" placeholder="Description courte du quiz"></textarea>
+      </div>
+      <div class="actions-bar">
+        <button class="btn primary" onclick="saveModele()" id="btnSaveModele">Sauvegarder</button>
+        <button class="btn green" onclick="activateModele()" id="btnActivate">✓ Activer ce modèle</button>
+        <button class="btn danger" onclick="deleteModele()">Supprimer</button>
+      </div>
+    </div>
+
+    <!-- Génération IA -->
+    <div class="generate-panel">
+      <p class="card-title">🤖 Générer les questions via IA</p>
+      <div class="row" style="align-items:flex-end;">
+        <div class="field" style="margin-bottom:0;">
+          <label>Sujet pour la génération</label>
+          <input type="text" id="genSujet" placeholder="Ex: gestion du stress en compétition équestre" />
+        </div>
+        <div class="field" style="margin-bottom:0;max-width:100px;">
+          <label>Nb questions</label>
+          <input type="text" id="genNb" value="12" />
+        </div>
+        <button class="btn primary" onclick="generateQuestions()" id="btnGenerate" style="white-space:nowrap;flex-shrink:0;">Générer</button>
+      </div>
+      <p style="font-size:0.75rem;color:var(--accent-btn);margin-top:0.6rem;font-family:monospace;">⚠ La génération remplace les questions actuelles dans l'éditeur. Sauvegarde d'abord si nécessaire.</p>
+    </div>
+
+    <!-- Questions -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+      <p class="card-title" style="margin:0;">Questions <span id="questionsCount" style="color:var(--text-muted);">(0)</span></p>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn small" onclick="addQuestion()">+ Ajouter</button>
+        <button class="btn small primary" onclick="saveQuestions()" id="btnSaveQ">Sauvegarder les questions</button>
+      </div>
+    </div>
+    <div id="questionsList"></div>
+
+  </div>
+
+</div>
+
+<script>
+let currentModeleId = null;
+let localQuestions = [];
+let allModeles = [];
+
+const API = '/api/quiz';
+
+async function api(body) {
+  const r = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || `Erreur ${r.status}`);
+  return d;
+}
+
+function showStatus(msg, type = 'success') {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = 'status-msg ' + type;
+  setTimeout(() => el.className = 'status-msg', 3000);
+}
+
+// ====== LISTE ======
+
+async function loadList() {
+  try {
+    allModeles = await api({ action: 'list_modeles' });
+    renderList();
+  } catch (e) {
+    document.getElementById('modelesList').innerHTML = `<div class="empty-state">Erreur : ${e.message}</div>`;
+  }
+}
+
+function renderList() {
+  const el = document.getElementById('modelesList');
+  if (!allModeles.length) {
+    el.innerHTML = '<div class="empty-state">Aucun modèle. Créez-en un pour commencer.</div>';
+    return;
+  }
+  el.innerHTML = allModeles.map(m => `
+    <div class="modele-row">
+      <div class="modele-info">
+        <div class="modele-titre">${m.titre} ${m.actif ? '<span class="badge-actif">Actif</span>' : ''}</div>
+        ${m.sujet ? `<div class="modele-sujet">${m.sujet}</div>` : ''}
+      </div>
+      <div class="modele-actions">
+        <button class="btn small" onclick="editModele('${m.id}')">Éditer</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ====== NOUVEAU / ÉDITION ======
+
+function newModele() {
+  currentModeleId = null;
+  localQuestions = [];
+  document.getElementById('editTitre').value = '';
+  document.getElementById('editSujet').value = '';
+  document.getElementById('editDescription').value = '';
+  document.getElementById('btnActivate').disabled = true;
+  document.getElementById('viewList').style.display = 'none';
+  document.getElementById('viewEdit').style.display = 'block';
+  renderQuestions();
+}
+
+async function editModele(id) {
+  currentModeleId = id;
+  const modele = allModeles.find(m => m.id === id);
+  document.getElementById('editTitre').value = modele.titre || '';
+  document.getElementById('editSujet').value = modele.sujet || '';
+  document.getElementById('editDescription').value = modele.description || '';
+  document.getElementById('btnActivate').disabled = false;
+  document.getElementById('viewList').style.display = 'none';
+  document.getElementById('viewEdit').style.display = 'block';
+
+  try {
+    const questions = await api({ action: 'get_questions', modele_id: id });
+    localQuestions = questions.map(q => ({ texte: q.texte, choix: q.choix }));
+    renderQuestions();
+  } catch (e) {
+    showStatus('Erreur chargement questions : ' + e.message, 'error');
+  }
+}
+
+function backToList() {
+  document.getElementById('viewEdit').style.display = 'none';
+  document.getElementById('viewList').style.display = 'block';
+  loadList();
+}
+
+async function saveModele() {
+  const titre = document.getElementById('editTitre').value.trim();
+  if (!titre) { showStatus('Le titre est requis', 'error'); return; }
+
+  const btn = document.getElementById('btnSaveModele');
+  btn.disabled = true;
+  btn.textContent = 'Sauvegarde…';
+
+  try {
+    const data = {
+      titre,
+      sujet: document.getElementById('editSujet').value.trim() || null,
+      description: document.getElementById('editDescription').value.trim() || null
+    };
+    const result = await api({ action: 'save_modele', id: currentModeleId, data });
+    if (!currentModeleId) {
+      currentModeleId = result.id;
+      document.getElementById('btnActivate').disabled = false;
+    }
+    showStatus('Modèle sauvegardé');
+  } catch (e) {
+    showStatus('Erreur : ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sauvegarder';
+  }
+}
+
+async function activateModele() {
+  if (!currentModeleId) { showStatus('Sauvegardez d\'abord le modèle', 'error'); return; }
+  try {
+    await api({ action: 'activate_modele', id: currentModeleId });
+    showStatus('Modèle activé — le quiz public utilise maintenant ce modèle');
+  } catch (e) {
+    showStatus('Erreur : ' + e.message, 'error');
+  }
+}
+
+async function deleteModele() {
+  if (!currentModeleId) { backToList(); return; }
+  if (!confirm('Supprimer ce modèle et toutes ses questions ?')) return;
+  try {
+    await api({ action: 'delete_modele', id: currentModeleId });
+    backToList();
+  } catch (e) {
+    showStatus('Erreur : ' + e.message, 'error');
+  }
+}
+
+// ====== QUESTIONS ======
+
+function renderQuestions() {
+  const el = document.getElementById('questionsList');
+  document.getElementById('questionsCount').textContent = `(${localQuestions.length})`;
+
+  if (!localQuestions.length) {
+    el.innerHTML = '<div class="empty-state">Aucune question. Ajoutez-en ou générez via IA.</div>';
+    return;
+  }
+
+  el.innerHTML = localQuestions.map((q, i) => `
+    <div class="question-item" id="qi-${i}">
+      <div class="question-header" onclick="toggleQuestion(${i})">
+        <span class="question-num">Q${i + 1}</span>
+        <span class="question-preview">${q.texte || '<em style="color:var(--text-hint)">Sans texte</em>'}</span>
+        <div class="question-controls" onclick="event.stopPropagation()">
+          <button class="btn-icon" onclick="moveQ(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="Monter">↑</button>
+          <button class="btn-icon" onclick="moveQ(${i}, 1)" ${i === localQuestions.length - 1 ? 'disabled' : ''} title="Descendre">↓</button>
+          <button class="btn-icon danger" onclick="deleteQ(${i})" title="Supprimer">×</button>
+        </div>
+      </div>
+      <div class="question-body" id="qb-${i}">
+        <div class="field">
+          <label>Texte de la question</label>
+          <input type="text" value="${escHtml(q.texte)}" oninput="updateQ(${i}, 'texte', this.value)" placeholder="La question…" />
+        </div>
+        <p class="card-title" style="margin-bottom:0.4rem;">Choix (le choix D doit être la réponse équilibrée)</p>
+        <div class="choices-grid">
+          ${(q.choix || ['','','','']).map((c, ci) => `
+            <div>
+              <div class="choice-label">${['A','B','C','D'][ci]}</div>
+              <input type="text" value="${escHtml(c)}" oninput="updateChoice(${i}, ${ci}, this.value)" placeholder="Choix ${['A','B','C','D'][ci]}…" />
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleQuestion(i) {
+  const body = document.getElementById(`qb-${i}`);
+  body.classList.toggle('open');
+}
+
+function updateQ(i, field, val) {
+  localQuestions[i][field] = val;
+  const preview = document.querySelector(`#qi-${i} .question-preview`);
+  if (preview) preview.textContent = val || '';
+}
+
+function updateChoice(i, ci, val) {
+  if (!localQuestions[i].choix) localQuestions[i].choix = ['','','',''];
+  localQuestions[i].choix[ci] = val;
+}
+
+function moveQ(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= localQuestions.length) return;
+  [localQuestions[i], localQuestions[j]] = [localQuestions[j], localQuestions[i]];
+  renderQuestions();
+}
+
+function deleteQ(i) {
+  localQuestions.splice(i, 1);
+  renderQuestions();
+}
+
+function addQuestion() {
+  localQuestions.push({ texte: '', choix: ['', '', '', ''] });
+  renderQuestions();
+  const last = localQuestions.length - 1;
+  document.getElementById(`qb-${last}`)?.classList.add('open');
+}
+
+async function saveQuestions() {
+  if (!currentModeleId) { showStatus('Sauvegardez d\'abord le modèle', 'error'); return; }
+  const btn = document.getElementById('btnSaveQ');
+  btn.disabled = true;
+  btn.textContent = 'Sauvegarde…';
+  try {
+    await api({ action: 'save_questions', modele_id: currentModeleId, questions: localQuestions });
+    showStatus(`${localQuestions.length} questions sauvegardées`);
+  } catch (e) {
+    showStatus('Erreur : ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sauvegarder les questions';
+  }
+}
+
+// ====== GÉNÉRATION IA ======
+
+async function generateQuestions() {
+  const sujet = document.getElementById('genSujet').value.trim();
+  if (!sujet) { showStatus('Entrez un sujet pour la génération', 'error'); return; }
+  const nb = parseInt(document.getElementById('genNb').value) || 12;
+
+  const btn = document.getElementById('btnGenerate');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-inline"></span> Génération…';
+
+  try {
+    const result = await api({ action: 'generate_questions', sujet, nb });
+    if (!result.questions?.length) throw new Error('Aucune question générée');
+    localQuestions = result.questions.map(q => ({ texte: q.texte, choix: q.choix }));
+    renderQuestions();
+    showStatus(`${localQuestions.length} questions générées — pensez à sauvegarder`);
+  } catch (e) {
+    showStatus('Erreur génération : ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Générer';
+  }
+}
+
+// ====== UTILS ======
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ====== INIT ======
+loadList();
+</script>
+</body>
+</html>

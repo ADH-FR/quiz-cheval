@@ -514,8 +514,24 @@ const QUESTIONS = [
 ];
 
 let current = 0;
-let answers = new Array(12).fill(null);
+let answers = [];
 let currentProfile = null;
+let activeQuestions = null;
+
+async function loadActiveQuiz() {
+  try {
+    const data = await fetch('/api/quiz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_active_quiz' })
+    }).then(r => r.json());
+
+    if (data.questions?.length) {
+      activeQuestions = data.questions.map(q => ({ q: q.texte, choices: q.choix }));
+    }
+  } catch {}
+  answers = new Array((activeQuestions || QUESTIONS).length).fill(null);
+}
 
 function show(id) {
   ['hero', 'quiz', 'loading', 'preresultat', 'result'].forEach(s => {
@@ -528,16 +544,22 @@ function show(id) {
   });
 }
 
+function getQuestions() {
+  return activeQuestions || QUESTIONS;
+}
+
 function startQuiz() {
+  answers = new Array(getQuestions().length).fill(null);
   show('quiz');
   renderQuestion();
 }
 
 function renderQuestion() {
-  const q = QUESTIONS[current];
-  document.getElementById('questionCounter').textContent = `Question ${current + 1} / ${QUESTIONS.length}`;
+  const qs = getQuestions();
+  const q = qs[current];
+  document.getElementById('questionCounter').textContent = `Question ${current + 1} / ${qs.length}`;
   document.getElementById('questionText').textContent = q.q;
-  document.getElementById('progressBar').style.width = `${(current / QUESTIONS.length) * 100}%`;
+  document.getElementById('progressBar').style.width = `${(current / qs.length) * 100}%`;
 
   const letters = ['A', 'B', 'C', 'D'];
   const choicesEl = document.getElementById('choices');
@@ -551,7 +573,7 @@ function renderQuestion() {
   });
 
   document.getElementById('btnPrev').disabled = current === 0;
-  document.getElementById('btnNext').textContent = current === QUESTIONS.length - 1 ? 'Voir mon profil →' : 'Suivant →';
+  document.getElementById('btnNext').textContent = current === getQuestions().length - 1 ? 'Voir mon profil →' : 'Suivant →';
 }
 
 function selectChoice(val) {
@@ -565,7 +587,7 @@ function nextQ() {
     setTimeout(() => document.querySelectorAll('.choice-btn').forEach(b => b.style.borderColor = ''), 800);
     return;
   }
-  if (current < QUESTIONS.length - 1) {
+  if (current < getQuestions().length - 1) {
     current++;
     renderQuestion();
   } else {
@@ -584,7 +606,7 @@ async function submitQuiz() {
     const aiResp = await fetch('/api/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'get_profile', reponses: answers })
+      body: JSON.stringify({ action: 'get_profile', reponses: answers, questions: activeQuestions || null })
     });
 
     if (!aiResp.ok) {
@@ -674,7 +696,7 @@ function showResult(p) {
 
 function restart() {
   current = 0;
-  answers = new Array(12).fill(null);
+  answers = new Array(getQuestions().length).fill(null);
   currentProfile = null;
   document.getElementById('emailInput').value = '';
   document.getElementById('btnEmail').disabled = false;
