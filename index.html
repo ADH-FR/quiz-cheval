@@ -32,10 +32,7 @@
     .container { max-width: 640px; margin: 0 auto; }
 
     /* ---- HERO ---- */
-    .hero {
-      text-align: center;
-      padding: 3rem 1rem 2.5rem;
-    }
+    .hero { text-align: center; padding: 3rem 1rem 2.5rem; }
     .hero-icon { font-size: 3.5rem; margin-bottom: 1rem; }
     .hero h1 {
       font-size: 1.9rem;
@@ -44,12 +41,7 @@
       color: var(--accent);
       margin-bottom: 0.75rem;
     }
-    .hero p {
-      color: var(--text-muted);
-      font-size: 1rem;
-      max-width: 480px;
-      margin: 0 auto 2rem;
-    }
+    .hero p { color: var(--text-muted); font-size: 1rem; max-width: 480px; margin: 0 auto 2rem; }
     .btn-start {
       display: inline-block;
       background: var(--accent);
@@ -81,7 +73,6 @@
       border-radius: 100px;
       transition: width 0.4s ease;
     }
-
     .question-counter {
       font-size: 0.75rem;
       font-family: monospace;
@@ -90,21 +81,8 @@
       letter-spacing: 0.1em;
       margin-bottom: 0.75rem;
     }
-
-    .question-text {
-      font-size: 1.25rem;
-      font-weight: normal;
-      color: var(--accent);
-      margin-bottom: 1.75rem;
-      line-height: 1.4;
-    }
-
-    .choices {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
+    .question-text { font-size: 1.25rem; font-weight: normal; color: var(--accent); margin-bottom: 1.75rem; line-height: 1.4; }
+    .choices { display: flex; flex-direction: column; gap: 0.75rem; }
     .choice-btn {
       display: flex;
       align-items: center;
@@ -121,34 +99,19 @@
       transition: border-color 0.15s, background 0.15s;
     }
     .choice-btn:hover { border-color: var(--accent); background: var(--accent-light); }
-    .choice-btn.selected {
-      border-color: var(--accent);
-      background: var(--accent-light);
-      font-weight: 600;
-    }
+    .choice-btn.selected { border-color: var(--accent); background: var(--accent-light); font-weight: 600; }
     .choice-letter {
-      width: 26px;
-      height: 26px;
+      width: 26px; height: 26px;
       border-radius: 50%;
       background: var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 0.75rem;
       font-family: monospace;
       flex-shrink: 0;
       color: var(--text-muted);
     }
-    .choice-btn.selected .choice-letter {
-      background: var(--accent);
-      color: white;
-    }
-
-    .nav-btns {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 2rem;
-    }
+    .choice-btn.selected .choice-letter { background: var(--accent); color: white; }
+    .nav-btns { display: flex; justify-content: space-between; margin-top: 2rem; }
     .btn-nav {
       padding: 0.7rem 1.5rem;
       border-radius: 100px;
@@ -161,11 +124,7 @@
       transition: all 0.15s;
     }
     .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-nav.primary {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
+    .btn-nav.primary { background: var(--accent); color: white; border-color: var(--accent); }
     .btn-nav.primary:hover { background: var(--accent-btn); }
     .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -182,6 +141,91 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-section p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* ---- PRÉ-RÉSULTAT ---- */
+    .preresultat-section { display: none; }
+    .preresultat-section.active { display: block; }
+
+    .pre-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .pre-badge {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 0.7rem;
+      font-family: monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+    .pre-emoji { font-size: 3rem; margin-bottom: 0.75rem; }
+    .pre-title { font-size: 2rem; color: var(--accent); margin-bottom: 1.5rem; }
+    .pre-tension {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      text-align: left;
+      margin-bottom: 2rem;
+    }
+    .pre-tension p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .pre-tension p:last-child { margin-bottom: 0; }
+    .pre-tension ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .pre-tension ul li {
+      font-size: 0.9rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pre-tension ul li::before { content: "✓"; font-weight: bold; }
+
+    .email-form { display: flex; flex-direction: column; gap: 0.75rem; }
+    .email-input {
+      width: 100%;
+      padding: 0.9rem 1.25rem;
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .email-input:focus { border-color: var(--accent); }
+    .btn-email {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-email:hover { background: var(--accent-btn); }
+    .btn-email:disabled { opacity: 0.6; cursor: not-allowed; }
+    .privacy-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-family: monospace; }
 
     /* ---- RESULT ---- */
     .result-section { display: none; }
@@ -205,17 +249,8 @@
       color: var(--text-muted);
       margin-bottom: 0.4rem;
     }
-    .result-title {
-      font-size: 2rem;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
-    }
-    .result-subtitle {
-      font-size: 1rem;
-      color: var(--text-muted);
-      font-style: italic;
-      margin-bottom: 1.5rem;
-    }
+    .result-title { font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; }
+    .result-subtitle { font-size: 1rem; color: var(--text-muted); font-style: italic; margin-bottom: 1.5rem; }
     .result-pct {
       display: inline-block;
       background: var(--accent-light);
@@ -225,13 +260,7 @@
       font-size: 0.85rem;
       margin-bottom: 1.75rem;
     }
-    .result-description {
-      font-size: 1rem;
-      line-height: 1.75;
-      color: var(--text);
-      text-align: left;
-      margin-bottom: 1.5rem;
-    }
+    .result-description { font-size: 1rem; line-height: 1.75; color: var(--text); text-align: left; margin-bottom: 1.5rem; }
     .result-conseil {
       background: var(--accent-light);
       border-left: 3px solid var(--accent);
@@ -240,8 +269,21 @@
       text-align: left;
       font-size: 0.9rem;
       color: var(--accent);
+      margin-bottom: 1.5rem;
     }
     .result-conseil strong { display: block; margin-bottom: 0.25rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .email-sent-notice {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: #f0faf4;
+      border: 1px solid #b7e4c7;
+      border-radius: var(--radius);
+      padding: 0.9rem 1.25rem;
+      font-size: 0.85rem;
+      color: #2d6a4f;
+      margin-bottom: 1.5rem;
+    }
 
     .btn-restart {
       display: block;
@@ -303,7 +345,39 @@
     <p>Analyse de ton profil en cours…</p>
   </section>
 
-  <!-- RESULT -->
+  <!-- PRÉ-RÉSULTAT + CAPTURE EMAIL -->
+  <section id="preresultat" class="preresultat-section">
+    <div class="pre-card">
+      <div class="pre-badge">Profil identifié</div>
+      <div class="pre-emoji" id="preEmoji"></div>
+      <h2 class="pre-title" id="preTitle"></h2>
+      <div class="pre-tension">
+        <p>Tes réponses révèlent un schéma mental très précis — et il existe des leviers concrets pour le transformer.</p>
+        <p>Ton analyse complète inclut :</p>
+        <ul>
+          <li>Ton diagnostic personnalisé</li>
+          <li>Pourquoi tu bloques malgré tes efforts</li>
+          <li>Ce qui devient possible pour toi</li>
+          <li>La première chose à changer dès maintenant</li>
+        </ul>
+      </div>
+      <form class="email-form" onsubmit="submitEmail(event)">
+        <input
+          class="email-input"
+          type="email"
+          id="emailInput"
+          placeholder="ton@email.com"
+          required
+          autocomplete="email"
+        />
+        <button class="btn-email" id="btnEmail" type="submit">Recevoir mon analyse complète →</button>
+      </form>
+      <p class="privacy-note">Pas de spam. Uniquement ton résultat personnalisé.</p>
+    </div>
+    <div class="error-msg" id="preErrorMsg"></div>
+  </section>
+
+  <!-- RÉSULTAT COMPLET -->
   <section id="result" class="result-section">
     <div class="result-card">
       <div class="result-emoji" id="resEmoji"></div>
@@ -315,6 +389,10 @@
       <div class="result-conseil">
         <strong>Piste concrète</strong>
         <span id="resConseil"></span>
+      </div>
+      <div class="email-sent-notice" id="emailSentNotice">
+        <span>✉️</span>
+        <span>Ton analyse complète a été envoyée à <strong id="emailSentTo"></strong></span>
       </div>
     </div>
     <div class="error-msg" id="errorMsg"></div>
@@ -437,10 +515,21 @@ const QUESTIONS = [
 
 let current = 0;
 let answers = new Array(12).fill(null);
+let currentProfile = null;
+
+function show(id) {
+  ['hero', 'quiz', 'loading', 'preresultat', 'result'].forEach(s => {
+    const el = document.getElementById(s);
+    if (s === 'hero') {
+      el.style.display = s === id ? '' : 'none';
+    } else {
+      el.classList.toggle('active', s === id);
+    }
+  });
+}
 
 function startQuiz() {
-  document.getElementById('hero').style.display = 'none';
-  document.getElementById('quiz').classList.add('active');
+  show('quiz');
   renderQuestion();
 }
 
@@ -462,8 +551,7 @@ function renderQuestion() {
   });
 
   document.getElementById('btnPrev').disabled = current === 0;
-  const isLast = current === QUESTIONS.length - 1;
-  document.getElementById('btnNext').textContent = isLast ? 'Voir mon profil →' : 'Suivant →';
+  document.getElementById('btnNext').textContent = current === QUESTIONS.length - 1 ? 'Voir mon profil →' : 'Suivant →';
 }
 
 function selectChoice(val) {
@@ -490,11 +578,9 @@ function prevQ() {
 }
 
 async function submitQuiz() {
-  document.getElementById('quiz').classList.remove('active');
-  document.getElementById('loading').classList.add('active');
+  show('loading');
 
   try {
-    // 1. Get AI profile
     const aiResp = await fetch('/api/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -508,50 +594,94 @@ async function submitQuiz() {
     const profile = await aiResp.json();
     if (profile.error) throw new Error(profile.error);
 
-    // 2. Save to Supabase
-    await fetch('/api/quiz', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'save_result',
-        data: {
-          reponses: answers,
-          profil: profile.profil,
-          profil_secondaire: profile.profil_secondaire || null,
-          description_ia: profile.description,
-          created_at: new Date().toISOString()
-        }
-      })
-    });
-
-    showResult(profile);
+    currentProfile = profile;
+    showPreResult(profile);
   } catch (err) {
-    document.getElementById('loading').classList.remove('active');
-    document.getElementById('result').classList.add('active');
-    const errEl = document.getElementById('errorMsg');
+    show('preresultat');
+    const errEl = document.getElementById('preErrorMsg');
     errEl.textContent = 'Une erreur est survenue : ' + err.message;
     errEl.classList.add('visible');
   }
 }
 
-function showResult(p) {
-  document.getElementById('loading').classList.remove('active');
-  document.getElementById('result').classList.add('active');
+function showPreResult(p) {
+  document.getElementById('preEmoji').textContent = p.emoji || '🐴';
+  document.getElementById('preTitle').textContent = p.profil;
+  show('preresultat');
+}
 
+async function submitEmail(e) {
+  e.preventDefault();
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email) return;
+
+  const btn = document.getElementById('btnEmail');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+
+  try {
+    await Promise.all([
+      fetch('/api/quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_result',
+          data: {
+            email,
+            reponses: answers,
+            profil: currentProfile.profil,
+            profil_secondaire: currentProfile.profil_secondaire || null,
+            description_ia: currentProfile.description,
+            created_at: new Date().toISOString()
+          }
+        })
+      }),
+      fetch('/api/quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send_email',
+          email,
+          profil: currentProfile.profil,
+          sous_titre: currentProfile.sous_titre,
+          description: currentProfile.description,
+          conseil_cle: currentProfile.conseil_cle,
+          profil_secondaire: currentProfile.profil_secondaire || null
+        })
+      })
+    ]);
+
+    document.getElementById('emailSentTo').textContent = email;
+    showResult(currentProfile);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Recevoir mon analyse complète →';
+    const errEl = document.getElementById('preErrorMsg');
+    errEl.textContent = 'Erreur : ' + err.message;
+    errEl.classList.add('visible');
+  }
+}
+
+function showResult(p) {
   document.getElementById('resEmoji').textContent = p.emoji || '🐴';
   document.getElementById('resTitle').textContent = p.profil;
   document.getElementById('resSubtitle').textContent = p.sous_titre;
   document.getElementById('resPct').textContent = `Ce profil représente environ ${p.pourcentage} des cavaliers`;
   document.getElementById('resDescription').textContent = p.description;
   document.getElementById('resConseil').textContent = p.conseil_cle;
+  show('result');
 }
 
 function restart() {
   current = 0;
   answers = new Array(12).fill(null);
-  document.getElementById('result').classList.remove('active');
+  currentProfile = null;
+  document.getElementById('emailInput').value = '';
+  document.getElementById('btnEmail').disabled = false;
+  document.getElementById('btnEmail').textContent = 'Recevoir mon analyse complète →';
+  document.getElementById('preErrorMsg').classList.remove('visible');
   document.getElementById('errorMsg').classList.remove('visible');
-  document.getElementById('hero').style.display = '';
+  show('hero');
 }
 </script>
 </body>
