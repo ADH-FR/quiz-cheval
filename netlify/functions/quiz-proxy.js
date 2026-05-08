@@ -25,7 +25,7 @@ export default async (req) => {
 async function handler(req) {
   const SUPA_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
   const SUPA_KEY = process.env.SUPABASE_ANON_KEY;
-  const OPENAI_KEY = process.env.OPENAI_API_KEY;
+  const ANTHROPIC_KEY = process.env.AI_SECRET;
 
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
@@ -53,7 +53,7 @@ async function handler(req) {
 
   // ---- AI profile generation ----
   if (action === 'get_profile') {
-    if (!OPENAI_KEY) return json({ error: 'OpenAI not configured' }, 500);
+    if (!ANTHROPIC_KEY) return json({ error: 'AI_SECRET non configuré' }, 500);
 
     const { reponses } = body;
 
@@ -122,24 +122,27 @@ Réponds en JSON avec cette structure exacte :
   "profil_secondaire": "nom ou null"
 }`;
 
-    const aiResp = await fetch('https://api.openai.com/v1/chat/completions', {
+    const aiResp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_KEY}`
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        response_format: { type: 'json_object' },
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 600
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 700,
+        messages: [{ role: 'user', content: prompt }]
       })
     });
 
     const aiData = await aiResp.json();
-    if (!aiResp.ok) return json({ error: aiData.error?.message || 'OpenAI error' }, 500);
+    if (!aiResp.ok) return json({ error: aiData.error?.message || 'Anthropic error' }, 500);
 
-    const result = JSON.parse(aiData.choices[0].message.content);
+    const raw = aiData.content[0].text;
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return json({ error: 'Réponse IA invalide' }, 500);
+    const result = JSON.parse(jsonMatch[0]);
     return json(result);
   }
 

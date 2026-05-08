@@ -501,7 +501,10 @@ async function submitQuiz() {
       body: JSON.stringify({ action: 'get_profile', reponses: answers })
     });
 
-    if (!aiResp.ok) throw new Error(`Erreur serveur (${aiResp.status})`);
+    if (!aiResp.ok) {
+      const errData = await aiResp.json().catch(() => ({}));
+      throw new Error(errData.error || `Erreur serveur (${aiResp.status})`);
+    }
     const profile = await aiResp.json();
     if (profile.error) throw new Error(profile.error);
 
