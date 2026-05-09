@@ -51,7 +51,7 @@ async function handler(req) {
   const SUPA_KEY = process.env.SUPABASE_ANON_KEY;
   const ANTHROPIC_KEY = process.env.AI_SECRET;
   const RESEND_KEY = process.env.RESEND_SECRET;
-  const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
+  const SENDER_EMAIL = process.env.SENDER_EMAIL || 'coach.in.mental@maloriebernard.com';
 
   const body = await req.json();
   const { action } = body;
@@ -291,15 +291,16 @@ Réponds en JSON :
     if (!ANTHROPIC_KEY) return json({ error: 'AI_SECRET non configuré' }, 500);
     if (!RESEND_KEY) return json({ error: 'RESEND_SECRET non configuré' }, 500);
 
-    const { email, profil, sous_titre, description, conseil_cle, profil_secondaire } = body;
+    const { email, prenom, profil, sous_titre, description, conseil_cle, profil_secondaire } = body;
+    const prenomDisplay = prenom ? prenom.charAt(0).toUpperCase() + prenom.slice(1) : '';
 
-    const emailPrompt = `Tu es une psychologue du sport spécialisée en équitation. Rédige un email de résultat personnalisé.
+    const emailPrompt = `Tu es une psychologue du sport spécialisée en équitation. Rédige un email de résultat personnalisé${prenomDisplay ? ` pour ${prenomDisplay}` : ''}.
 
 PROFIL IDENTIFIÉ : ${profil}
 ${profil_secondaire ? `PROFIL SECONDAIRE : ${profil_secondaire}` : ''}
 RÉSUMÉ : ${description}
 
-Rédige 4 sections courtes (2-3 phrases chacune), ton bienveillant et encourageant :
+Rédige 4 sections courtes (2-3 phrases chacune), ton bienveillant et encourageant. ${prenomDisplay ? `Utilise le prénom ${prenomDisplay} naturellement dans le texte.` : ''}
 
 Réponds en JSON :
 {
@@ -311,12 +312,13 @@ Réponds en JSON :
 
     const emailRaw = await callClaude(ANTHROPIC_KEY, emailPrompt, 600);
     const sections = parseJson(emailRaw);
-    const html = buildEmailHTML({ profil, sous_titre, conseil_cle, profil_secondaire, ...sections });
+    const html = buildEmailHTML({ prenom: prenomDisplay, profil, sous_titre, conseil_cle, profil_secondaire, ...sections });
 
+    const subjectName = prenomDisplay ? `${prenomDisplay}, ton profil mental à cheval : ${profil}` : `Ton profil mental à cheval : ${profil}`;
     const sendResp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_KEY}` },
-      body: JSON.stringify({ from: SENDER_EMAIL, to: email, subject: `Ton profil mental à cheval : ${profil}`, html })
+      body: JSON.stringify({ from: SENDER_EMAIL, to: email, subject: subjectName, html })
     });
 
     if (!sendResp.ok) {
@@ -329,14 +331,14 @@ Réponds en JSON :
   return json({ error: 'Unknown action' }, 400);
 }
 
-function buildEmailHTML({ profil, sous_titre, conseil_cle, profil_secondaire, diagnostic, consequences, projection, micro_solution }) {
+function buildEmailHTML({ prenom, profil, sous_titre, conseil_cle, profil_secondaire, diagnostic, consequences, projection, micro_solution }) {
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#faf9f6;font-family:Georgia,serif;">
 <div style="max-width:580px;margin:0 auto;padding:2rem 1rem;">
   <div style="text-align:center;padding:2rem 0 1.5rem;">
-    <p style="font-size:0.75rem;font-family:monospace;color:#9e9d97;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;">Ton profil mental à cheval</p>
+    <p style="font-size:0.75rem;font-family:monospace;color:#9e9d97;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;">${prenom ? `Bonjour ${prenom} —` : ''} Ton profil mental à cheval</p>
     <h1 style="font-size:1.8rem;color:#5c3d2e;font-weight:normal;margin:0 0 0.5rem;">${profil}</h1>
     <p style="color:#6b6860;font-style:italic;font-size:0.95rem;margin:0;">${sous_titre}</p>
     ${profil_secondaire ? `<p style="font-size:0.8rem;color:#9e9d97;margin-top:0.5rem;font-family:monospace;">Profil secondaire : ${profil_secondaire}</p>` : ''}
