@@ -167,35 +167,58 @@
       margin-bottom: 1.5rem;
     }
     .pre-emoji { font-size: 3rem; margin-bottom: 0.75rem; }
-    .pre-title { font-size: 2rem; color: var(--accent); margin-bottom: 1.5rem; }
-    .pre-tension {
+    .pre-title { font-size: 2rem; color: var(--accent); margin-bottom: 0.4rem; }
+    .pre-subtitle { font-style: italic; color: var(--text-muted); font-size: 1rem; margin-bottom: 0.75rem; }
+    .pre-pct {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.25rem 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .pre-teaser {
+      position: relative;
+      text-align: left;
       background: var(--bg);
       border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-      text-align: left;
-      margin-bottom: 2rem;
+      padding: 1.25rem 1.5rem 0;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+      max-height: 10rem;
     }
-    .pre-tension p {
+    .pre-teaser-text {
       font-size: 0.95rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin-bottom: 1rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin: 0;
     }
-    .pre-tension p:last-child { margin-bottom: 0; }
-    .pre-tension ul {
-      list-style: none;
+    .pre-teaser-fade {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4rem;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+    }
+    .pre-locked {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.45rem;
+      text-align: left;
+      margin-bottom: 1.75rem;
     }
-    .pre-tension ul li {
-      font-size: 0.9rem;
+    .pre-locked-item {
+      font-size: 0.88rem;
       color: var(--accent);
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      padding: 0.5rem 0.85rem;
+      background: var(--accent-light);
+      border-radius: 8px;
     }
-    .pre-tension ul li::before { content: "✓"; font-weight: bold; }
 
     .email-form { display: flex; flex-direction: column; gap: 0.75rem; }
     .email-input {
@@ -226,6 +249,14 @@
     .btn-email:hover { background: var(--accent-btn); }
     .btn-email:disabled { opacity: 0.6; cursor: not-allowed; }
     .privacy-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-family: monospace; }
+    .rgpd-note {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 0.85rem;
+      font-family: monospace;
+      text-align: center;
+    }
 
     /* ---- RESULT ---- */
     .result-section { display: none; }
@@ -351,15 +382,17 @@
       <div class="pre-badge">Profil identifié</div>
       <div class="pre-emoji" id="preEmoji"></div>
       <h2 class="pre-title" id="preTitle"></h2>
-      <div class="pre-tension">
-        <p>Tes réponses révèlent un schéma mental très précis — et il existe des leviers concrets pour le transformer.</p>
-        <p>Ton analyse complète inclut :</p>
-        <ul>
-          <li>Ton diagnostic personnalisé</li>
-          <li>Pourquoi tu bloques malgré tes efforts</li>
-          <li>Ce qui devient possible pour toi</li>
-          <li>La première chose à changer dès maintenant</li>
-        </ul>
+      <p class="pre-subtitle" id="preSubTitle"></p>
+      <div class="pre-pct" id="prePct"></div>
+      <div class="pre-teaser">
+        <p class="pre-teaser-text" id="preTeaserText"></p>
+        <div class="pre-teaser-fade"></div>
+      </div>
+      <div class="pre-locked">
+        <div class="pre-locked-item">🔍 Ton diagnostic complet</div>
+        <div class="pre-locked-item">🔓 Pourquoi tu bloques malgré tes efforts</div>
+        <div class="pre-locked-item">✨ Ce qui devient possible pour toi</div>
+        <div class="pre-locked-item">→ La première chose à changer dès maintenant</div>
       </div>
       <form class="email-form" onsubmit="submitEmail(event)">
         <input
@@ -370,9 +403,17 @@
           required
           autocomplete="email"
         />
+        <input
+          class="email-input"
+          type="text"
+          id="prenomInput"
+          placeholder="Ton prénom"
+          required
+          autocomplete="given-name"
+        />
         <button class="btn-email" id="btnEmail" type="submit">Recevoir mon analyse complète →</button>
       </form>
-      <p class="privacy-note">Pas de spam. Uniquement ton résultat personnalisé.</p>
+      <p class="rgpd-note">En recevant ton résultat, tu acceptes d'être inscrit(e) à notre newsletter. Ton email ne sera jamais communiqué à des tiers et tu pourras te désinscrire à tout moment en bas de chaque email.</p>
     </div>
     <div class="error-msg" id="preErrorMsg"></div>
   </section>
@@ -514,8 +555,24 @@ const QUESTIONS = [
 ];
 
 let current = 0;
-let answers = new Array(12).fill(null);
+let answers = [];
 let currentProfile = null;
+let activeQuestions = null;
+
+async function loadActiveQuiz() {
+  try {
+    const data = await fetch('/api/quiz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_active_quiz' })
+    }).then(r => r.json());
+
+    if (data.questions?.length) {
+      activeQuestions = data.questions.map(q => ({ q: q.texte, choices: q.choix }));
+    }
+  } catch {}
+  answers = new Array((activeQuestions || QUESTIONS).length).fill(null);
+}
 
 function show(id) {
   ['hero', 'quiz', 'loading', 'preresultat', 'result'].forEach(s => {
@@ -528,16 +585,22 @@ function show(id) {
   });
 }
 
+function getQuestions() {
+  return activeQuestions || QUESTIONS;
+}
+
 function startQuiz() {
+  answers = new Array(getQuestions().length).fill(null);
   show('quiz');
   renderQuestion();
 }
 
 function renderQuestion() {
-  const q = QUESTIONS[current];
-  document.getElementById('questionCounter').textContent = `Question ${current + 1} / ${QUESTIONS.length}`;
+  const qs = getQuestions();
+  const q = qs[current];
+  document.getElementById('questionCounter').textContent = `Question ${current + 1} / ${qs.length}`;
   document.getElementById('questionText').textContent = q.q;
-  document.getElementById('progressBar').style.width = `${(current / QUESTIONS.length) * 100}%`;
+  document.getElementById('progressBar').style.width = `${(current / qs.length) * 100}%`;
 
   const letters = ['A', 'B', 'C', 'D'];
   const choicesEl = document.getElementById('choices');
@@ -551,7 +614,7 @@ function renderQuestion() {
   });
 
   document.getElementById('btnPrev').disabled = current === 0;
-  document.getElementById('btnNext').textContent = current === QUESTIONS.length - 1 ? 'Voir mon profil →' : 'Suivant →';
+  document.getElementById('btnNext').textContent = current === getQuestions().length - 1 ? 'Voir mon profil →' : 'Suivant →';
 }
 
 function selectChoice(val) {
@@ -565,7 +628,7 @@ function nextQ() {
     setTimeout(() => document.querySelectorAll('.choice-btn').forEach(b => b.style.borderColor = ''), 800);
     return;
   }
-  if (current < QUESTIONS.length - 1) {
+  if (current < getQuestions().length - 1) {
     current++;
     renderQuestion();
   } else {
@@ -584,7 +647,11 @@ async function submitQuiz() {
     const aiResp = await fetch('/api/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'get_profile', reponses: answers })
+      body: JSON.stringify({
+        action: 'get_profile',
+        reponses: answers,
+        questions: activeQuestions ? activeQuestions.map(q => ({ texte: q.q, choix: q.choices })) : null
+      })
     });
 
     if (!aiResp.ok) {
@@ -607,20 +674,24 @@ async function submitQuiz() {
 function showPreResult(p) {
   document.getElementById('preEmoji').textContent = p.emoji || '🐴';
   document.getElementById('preTitle').textContent = p.profil;
+  document.getElementById('preSubTitle').textContent = p.sous_titre || '';
+  document.getElementById('prePct').textContent = `Ce profil concerne environ ${p.pourcentage} des cavalières`;
+  document.getElementById('preTeaserText').textContent = p.description ? p.description.slice(0, 320) + '…' : '';
   show('preresultat');
 }
 
 async function submitEmail(e) {
   e.preventDefault();
   const email = document.getElementById('emailInput').value.trim();
-  if (!email) return;
+  const prenom = document.getElementById('prenomInput').value.trim();
+  if (!email || !prenom) return;
 
   const btn = document.getElementById('btnEmail');
   btn.disabled = true;
   btn.textContent = 'Envoi en cours…';
 
   try {
-    await Promise.all([
+    const [, emailRes] = await Promise.all([
       fetch('/api/quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -628,6 +699,7 @@ async function submitEmail(e) {
           action: 'save_result',
           data: {
             email,
+            prenom,
             reponses: answers,
             profil: currentProfile.profil,
             profil_secondaire: currentProfile.profil_secondaire || null,
@@ -642,6 +714,7 @@ async function submitEmail(e) {
         body: JSON.stringify({
           action: 'send_email',
           email,
+          prenom,
           profil: currentProfile.profil,
           sous_titre: currentProfile.sous_titre,
           description: currentProfile.description,
@@ -650,6 +723,10 @@ async function submitEmail(e) {
         })
       })
     ]);
+    if (!emailRes.ok) {
+      const err = await emailRes.json();
+      throw new Error(err.error || 'Erreur envoi email');
+    }
 
     document.getElementById('emailSentTo').textContent = email;
     showResult(currentProfile);
@@ -674,9 +751,10 @@ function showResult(p) {
 
 function restart() {
   current = 0;
-  answers = new Array(12).fill(null);
+  answers = new Array(getQuestions().length).fill(null);
   currentProfile = null;
   document.getElementById('emailInput').value = '';
+  document.getElementById('prenomInput').value = '';
   document.getElementById('btnEmail').disabled = false;
   document.getElementById('btnEmail').textContent = 'Recevoir mon analyse complète →';
   document.getElementById('preErrorMsg').classList.remove('visible');
